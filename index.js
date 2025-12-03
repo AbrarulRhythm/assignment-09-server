@@ -35,9 +35,25 @@ async function run() {
         // await client.connect();
 
         const db = client.db('toy_topia_db');
-        const users = db.collection('users');
+        const usersCollections = db.collection('users');
 
         // :::::::::::::::::::::::::::::: - User Related APIS - ::::::::::::::::::::::::::::::
+        // Post API
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            user.role = 'user'; // User default role
+            user.createdAt = new Date();
+
+            const email = user.email
+            const userExist = await usersCollections.findOne({ email });
+
+            if (userExist) {
+                return res.send({ message: '⚡You already exist. Signed in successfully.' });
+            }
+
+            const result = await usersCollections.insertOne(user);
+            res.send(result);
+        });
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
